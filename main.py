@@ -35,14 +35,14 @@ def extract_table_data(table_id, driver, date_str):
     return data
 
 
-def add_to_csv(data, headers, file_path):
-    df = pd.DataFrame(data, columns=headers)
-    df.to_csv(file_path, index=False)
+def add_to_csv(data, file_path):
+    df = pd.DataFrame(data)
+    df.to_csv(file_path, mode='a', header=False, index=False)
 
 
 def print_headers(headers, file_path):
     df = pd.DataFrame([], columns=headers)
-    df.to_csv(file_path, mode='a', index=False)
+    df.to_csv(file_path, mode='w', index=False)
 
 
 def main():
@@ -78,7 +78,7 @@ def main():
         print_headers(buyers_headers, path)
     for path in providers_paths:
         print_headers(providers_headers, path)
-    start_date = datetime(2021, 11, 25)
+    start_date = datetime(2021, 11, 26)
     end_date = datetime(2024, 11, 24)
     url = "https://www.atsenergo.ru/results/rsv/index?zone=1"
 
@@ -102,13 +102,13 @@ def main():
                 select_hour_period(driver)
                 time.sleep(time_delta)
                 date_str = current_date.strftime("%Y.%m.%d")
-                table[0][zone_value] += extract_table_data("aid_stats_1_table_table", driver, date_str)
-                table[1][zone_value] += extract_table_data("aid_stats_2_table_table", driver, date_str)
+                table[0][zone_value] = extract_table_data("aid_stats_1_table_table", driver, date_str)
+                table[1][zone_value] = extract_table_data("aid_stats_2_table_table", driver, date_str)
 
-            add_to_csv(table[0][0], buyers_headers, buyers_paths[0])
-            add_to_csv(table[0][1], buyers_headers, buyers_paths[1])
-            add_to_csv(table[1][0], providers_headers, providers_paths[0])
-            add_to_csv(table[1][1], providers_headers, providers_paths[1])
+            add_to_csv(table[0][0], buyers_paths[0])
+            add_to_csv(table[0][1], buyers_paths[1])
+            add_to_csv(table[1][0], providers_paths[0])
+            add_to_csv(table[1][1], providers_paths[1])
             print(f"Saved data for {current_date}")
 
             current_date += timedelta(days=1)
